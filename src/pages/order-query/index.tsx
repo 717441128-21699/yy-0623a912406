@@ -7,63 +7,48 @@ import { mockOrders } from '@/data/mockOrders';
 import { useOrderStore } from '@/store/orderStore';
 import type { OrderInfo } from '@/types/order';
 
-const EMPTY_MARK = '__EMPTY_SCAN_RESULT__';
+const EMPTY_SCAN_MARK = '__EMPTY_SCAN_RESULT__';
 
 const OrderQueryPage: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [orders, setOrders] = useState<OrderInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState('');
+  const [isEmptyScan, setIsEmptyScan] = useState(false);
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInitialMount = useRef(true);
 
   const {
     hasSearched,
     searchedOrderNo,
     searchFailed,
     setSearchedOrderNo,
-    setSearchFailed,
     clearSearch
   } = useOrderStore(state => ({
     hasSearched: state.hasSearched,
     searchedOrderNo: state.searchedOrderNo,
     searchFailed: state.searchFailed,
     setSearchedOrderNo: state.setSearchedOrderNo,
-    setSearchFailed: state.setSearchFailed,
     clearSearch: state.clearSearch
   }));
 
-  const doExactSearch = useCallback((keyword: string, fromScan = false) => {
+  const doExactSearch = useCallback((keyword: string) => {
     const trimmedKeyword = keyword.trim();
-    const isEmptyScan = fromScan && trimmedKeyword === '';
-
-    if (!isEmptyScan && trimmedKeyword === '') {
-      setOrders([]);
-      setSearchError('');
-      clearSearch();
-      return;
-    }
 
     setLoading(true);
     setSearchError('');
+    setIsEmptyScan(false);
 
     setTimeout(() => {
-      let matched: OrderInfo[] = [];
-
-      if (!isEmptyScan) {
-        const upperKeyword = trimmedKeyword.toUpperCase();
-        matched = mockOrders.filter(o =>
-          o.orderNo.toUpperCase() === upperKeyword
-        );
-      }
+      const upperKeyword = trimmedKeyword.toUpperCase();
+      const matched = mockOrders.filter(o =>
+        o.orderNo.toUpperCase() === upperKeyword
+      );
 
       if (matched.length === 0) {
         setOrders([]);
-        if (isEmptyScan) {
-          setSearchError('未获取到有效扫码内容，请重试');
-        } else {
-          setSearchError(`未找到运单号"${trimmedKeyword}"相关的车辆信息`);
-        }
-        setSearchedOrderNo(isEmptyScan ? EMPTY_MARK : trimmedKeyword, true);
+        setSearchError(`未找到运单号"${trimmedKeyword}"相关的车辆信息`);
+        setSearchedOrderNo(trimmedKeyword, true);
       } else {
         setOrders(matched);
         setSearchError('');
@@ -72,34 +57,41 @@ const OrderQueryPage: React.FC = () => {
 
       setLoading(false);
     }, 300);
-  }, [clearSearch, setSearchedOrderNo]);
+  }, [setSearchedOrderNo]);
 
   useEffect(() => {
-    if (hasSearched && searchedOrderNo && searchedOrderNo !== EMPTY_MARK) {
-      setSearchText(searchedOrderNo);
-      doExactSearch(searchedOrderNo);
+    if (hasSearched && searchedOrderNo) {
+      if (searchedOrderNo === EMPTY_SCAN_MARK) {
+        setSearchText('');
+        setOrders([]);
+        setSearchError('未获取到有效扫码内容，请重试');
+        setIsEmptyScan(true);
+      } else {
+        setSearchText(searchedOrderNo);
+        doExactSearch(searchedOrderNo);
+      }
     }
-    if (searchedOrderNo === EMPTY_MARK) {
-      setSearchText('');
-      setOrders([]);
-      setSearchError('未获取到有效扫码内容，请重试');
-      setSearchFailed(true);
-    }
+    isInitialMount.current = false;
   }, []);
 
   useEffect(() => {
+    if (isInitialMount.current) return;
+
     if (searchTimerRef.current) {
       clearTimeout(searchTimerRef.current);
     }
 
     const trimmed = searchText.trim();
+
     if (trimmed === '') {
-      setOrders([]);
-      setSearchError('');
-      clearSearch();
+      if (!isEmptyScan && !searchFailed) {
+        setOrders([]);
+        setSearchError('');
+      }
       return;
     }
 
+    setIsEmptyScan(false);
     searchTimerRef.current = setTimeout(() => {
       doExactSearch(searchText);
     }, 500);
@@ -109,10 +101,10 @@ const OrderQueryPage: React.FC = () => {
         clearTimeout(searchTimerRef.current);
       }
     };
-  }, [searchText, doExactSearch, clearSearch]);
+  }, [searchText, doExactSearch, isEmptyScan, searchFailed]);
 
   useDidShow(() => {
-    if (hasSearched && searchedOrderNo && searchedOrderNo !== EMPTY_MARK) {
+    if (hasSearched && searchedOrderNo && searchedOrderNo !== EMPTY_SCAN_MARK) {
       doExactSearch(searchedOrderNo);
     }
   });
@@ -120,7 +112,7 @@ const OrderQueryPage: React.FC = () => {
   usePullDownRefresh(handlePullDownRefresh);
 
   function handlePullDownRefresh() {
-    if (hasSearched && searchedOrderNo && searchedOrderNo !== EMPTY_MARK) {
+    if (hasSearched && searchedOrderNo && searchedOrderNo !== EMPTY_SCAN_MARK) {
       doExactSearch(searchedOrderNo);
     }
     setTimeout(() => {
@@ -140,22 +132,18 @@ const OrderQueryPage: React.FC = () => {
           setSearchText('');
           setOrders([]);
           setSearchError('未获取到有效扫码内容，请重试');
-          setSearchedOrderNo(EMPTY_MARK, true);
+          setIsEmptyScan(true);
+          setSearchedOrderNo(EMPTY_SCAN_MARK, true);
           return;
         }
 
         setSearchText(scanResult);
+        setIsEmptyScan(false);
 
         const upperScan = scanResult.toUpperCase();
-        const exactMatched = mockOrders.find(o =>
+        const matched = mockOrders.find(o =>
           o.orderNo.toUpperCase() === upperScan
         );
-
-        const containedMatched = mockOrders.find(o =>
-          upperScan.includes(o.orderNo.toUpperCase())
-        );
-
-        const matched = exactMatched || containedMatched;
 
         if (matched) {
           console.log('[OrderQuery] scan matched, navigate to detail:', matched.orderNo);
@@ -185,12 +173,13 @@ const OrderQueryPage: React.FC = () => {
     setSearchText('');
     setOrders([]);
     setSearchError('');
+    setIsEmptyScan(false);
     clearSearch();
   };
 
-  const shouldShowEmpty = (hasSearched || searchFailed) && orders.length === 0 && !loading;
-  const shouldShowInitial = !hasSearched && !searchFailed && !loading;
-  const shouldShowResults = hasSearched && !searchFailed && orders.length > 0 && !loading;
+  const shouldShowEmpty = (hasSearched || searchFailed || isEmptyScan) && orders.length === 0 && !loading;
+  const shouldShowInitial = !hasSearched && !searchFailed && !isEmptyScan && !loading;
+  const shouldShowResults = hasSearched && !searchFailed && !isEmptyScan && orders.length > 0 && !loading;
 
   return (
     <View className={styles.page}>
