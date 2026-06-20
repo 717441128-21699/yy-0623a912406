@@ -1,0 +1,126 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  border-left: 6rpx solid $color-warning;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.highRisk {
+    border-left-color: $color-error;
+    background: linear-gradient(135deg, #fff1f0 0%, $color-bg-card 100%);
+  }
+
+  &.mediumRisk,
+  &.lowRisk {
+    border-left-color: $color-warning;
+    background: linear-gradient(135deg, #fff7e8 0%, $color-bg-card 100%);
+  }
+
+  &.normalRisk {
+    border-left-color: $color-success;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.alertIcon {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: $color-error;
+  color: $color-text-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  line-height: 1;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.time {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.content {
+  margin-bottom: $spacing-md;
+}
+
+.desc {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+.stats {
+  display: flex;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md 0;
+  margin-bottom: $spacing-md;
+}
+
+.statItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+
+  &:not(:last-child) {
+    border-right: 1rpx solid $color-border;
+  }
+}
+
+.statLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.statValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hint {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.arrow {
+  font-size: 32rpx;
+  color: $color-text-tertiary;
+  line-height: 1;
+}

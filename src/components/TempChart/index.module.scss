@@ -1,0 +1,35 @@
+@use '@/styles/variables.scss' as *;
+
+.chart {
+  width: 100%;
+  position: relative;
+}
+
+.svg {
+  width: 100%;
+  height: calc(100% - 24rpx);
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200rpx;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.xAxis {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40rpx;
+  margin-top: $spacing-xs;
+}
+
+.xLabel {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}

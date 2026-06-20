@@ -1,0 +1,343 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 180rpx;
+}
+
+.header {
+  background: $color-bg-card;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.orderNo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.orderNoText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.route {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-top: 1rpx solid $color-divider;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.point {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.pointLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.pointAddress {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  @include text-ellipsis;
+}
+
+.arrowBox {
+  width: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow {
+  font-size: $font-size-lg;
+  color: $color-text-tertiary;
+}
+
+.vehicleInfo {
+  display: flex;
+  margin-top: $spacing-md;
+  gap: $spacing-lg;
+}
+
+.vehicleItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.vehicleLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.vehicleValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.statusSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin: 0 $page-padding $spacing-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.statusGrid {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.statusItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  padding: $spacing-md 0;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.statusIcon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+
+  &.normal {
+    background: $color-success-bg;
+  }
+
+  &.warning {
+    background: $color-warning-bg;
+  }
+
+  &.error {
+    background: $color-error-bg;
+  }
+}
+
+.statusName {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.statusValue {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+
+  &.normal {
+    color: $color-success;
+  }
+
+  &.warning {
+    color: $color-warning;
+  }
+
+  &.error {
+    color: $color-error;
+  }
+}
+
+.tempSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin: 0 $page-padding $spacing-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.tempHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.tempCurrent {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.tempValue {
+  font-size: 48rpx;
+  font-weight: $font-weight-bold;
+  color: $color-cold;
+  line-height: 1;
+}
+
+.tempUnit {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.tempTarget {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.tempLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.eventsSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin: 0 $page-padding $spacing-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.eventList {
+  position: relative;
+}
+
+.eventItem {
+  display: flex;
+  gap: $spacing-md;
+  padding-bottom: $spacing-md;
+  position: relative;
+
+  &:last-child {
+    padding-bottom: 0;
+
+    .eventLine {
+      display: none;
+    }
+  }
+}
+
+.eventDot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: $color-primary;
+  flex-shrink: 0;
+  margin-top: 6rpx;
+  position: relative;
+  z-index: 1;
+
+  &.powerOff {
+    background: $color-error;
+  }
+
+  &.recovery {
+    background: $color-success;
+  }
+}
+
+.eventLine {
+  position: absolute;
+  left: 9rpx;
+  top: 30rpx;
+  bottom: 0;
+  width: 2rpx;
+  background: $color-border;
+}
+
+.eventContent {
+  flex: 1;
+}
+
+.eventTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: 6rpx;
+}
+
+.eventTime {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: 6rpx;
+}
+
+.eventDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.5;
+}
+
+.emptyEvents {
+  padding: $spacing-lg 0;
+  text-align: center;
+}
+
+.emptyText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+  z-index: 100;
+}
+
+.btnSecondary {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  background: $color-bg-page;
+  border: 2rpx solid $color-border;
+  color: $color-text-primary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.btnPrimary {
+  @include button-reset;
+  flex: 2;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.btnText {
+  font-size: $font-size-md;
+}

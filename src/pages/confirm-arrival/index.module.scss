@@ -1,0 +1,342 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 180rpx;
+}
+
+.orderHeader {
+  background: $color-bg-card;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.orderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.orderLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.orderValue {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+
+  &.orderNo {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.dataCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin: 0 $page-padding $spacing-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.cardTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.dataGrid {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.dataItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: $spacing-md 0;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+
+  &.highlight {
+    background: $color-warning-bg;
+  }
+}
+
+.dataValue {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+
+  &.warning {
+    color: $color-warning;
+  }
+
+  &.normal {
+    color: $color-success;
+  }
+}
+
+.dataLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.dataSub {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.noticeCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin: 0 $page-padding $spacing-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.noticeContent {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $color-primary-bg;
+  border-radius: $radius-md;
+  border-left: 6rpx solid $color-primary;
+}
+
+.noticeIcon {
+  font-size: 32rpx;
+  flex-shrink: 0;
+}
+
+.noticeText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.7;
+}
+
+.optionsCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin: 0 $page-padding $spacing-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.optionItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+
+  &.selected {
+    border-color: $color-primary;
+    background: $color-primary-bg;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.optionRadio {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 3rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &.selected {
+    border-color: $color-primary;
+  }
+}
+
+.optionRadioInner {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: $color-primary;
+  display: none;
+
+  .selected & {
+    display: block;
+  }
+}
+
+.optionContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.optionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.optionDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.optionTag {
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-sm;
+  align-self: flex-start;
+
+  &.normal {
+    background: $color-success-bg;
+    color: $color-success;
+  }
+
+  &.pending {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+
+  &.rejected {
+    background: $color-error-bg;
+    color: $color-error;
+  }
+}
+
+.remarkCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin: 0 $page-padding $spacing-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.remarkInput {
+  width: 100%;
+  min-height: 160rpx;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.remarkCount {
+  text-align: right;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: $spacing-sm;
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: $color-bg-card;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.06);
+  z-index: 100;
+}
+
+.submitBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+
+  &:active {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.confirmedCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin: $page-padding;
+  padding: $spacing-xl;
+  box-shadow: $shadow-card;
+  text-align: center;
+}
+
+.confirmedIcon {
+  font-size: 100rpx;
+  margin-bottom: $spacing-md;
+}
+
+.confirmedTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.confirmedSubtitle {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+}
+
+.confirmedResult {
+  display: inline-block;
+  padding: $spacing-sm $spacing-lg;
+  background: $color-success-bg;
+  color: $color-success;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-md;
+
+  &.pending {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+
+  &.rejected {
+    background: $color-error-bg;
+    color: $color-error;
+  }
+}
+
+.confirmedRemark {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  text-align: left;
+}

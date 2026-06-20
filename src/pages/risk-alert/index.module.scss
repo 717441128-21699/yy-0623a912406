@@ -1,0 +1,163 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+}
+
+.header {
+  background: linear-gradient(180deg, $color-error 0%, #ff7875 100%);
+  padding: $spacing-lg $page-padding $spacing-xl;
+  border-radius: 0 0 $radius-xl $radius-xl;
+}
+
+.headerTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-white;
+  margin-bottom: $spacing-sm;
+}
+
+.headerSubtitle {
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.statsRow {
+  display: flex;
+  gap: $spacing-md;
+  margin: -$spacing-md $page-padding $spacing-md;
+  position: relative;
+  z-index: 10;
+}
+
+.statCard {
+  flex: 1;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+
+  &.high {
+    .statNum {
+      color: $color-error;
+    }
+  }
+
+  &.medium {
+    .statNum {
+      color: $color-warning;
+    }
+  }
+
+  &.low {
+    .statNum {
+      color: $color-warning;
+    }
+  }
+}
+
+.statNum {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.filterTabs {
+  display: flex;
+  padding: 0 $page-padding;
+  margin-bottom: $spacing-md;
+  gap: $spacing-sm;
+}
+
+.filterTab {
+  padding: 12rpx $spacing-md;
+  border-radius: $radius-button;
+  background: $color-bg-card;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &.active {
+    background: $color-primary-bg;
+    border-color: $color-primary;
+
+    .tabText {
+      color: $color-primary;
+      font-weight: $font-weight-medium;
+    }
+  }
+}
+
+.tabText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.list {
+  padding: 0 $page-padding;
+  padding-bottom: 40rpx;
+}
+
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.listTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.listCount {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 0;
+}
+
+.emptyIcon {
+  font-size: 100rpx;
+  margin-bottom: $spacing-md;
+}
+
+.emptyTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+emptyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx 0;
+}
+
+.loadingText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}

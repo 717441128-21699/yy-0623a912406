@@ -1,0 +1,173 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.orderNo {
+  display: flex;
+  align-items: baseline;
+  gap: $spacing-sm;
+}
+
+.label {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.no {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.route {
+  display: flex;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-top: 1rpx solid $color-divider;
+  border-bottom: 1rpx solid $color-divider;
+  margin-bottom: $spacing-md;
+}
+
+.point {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  flex: 1;
+}
+
+.dotStart,
+.dotEnd {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dotStart {
+  background: $color-success;
+}
+
+.dotEnd {
+  background: $color-primary;
+}
+
+.line {
+  flex: 2;
+  height: 2rpx;
+  background: $color-border;
+  margin: 0 $spacing-sm;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 12rpx solid $color-border;
+    border-top: 8rpx solid transparent;
+    border-bottom: 8rpx solid transparent;
+  }
+}
+
+.address {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.info {
+  display: flex;
+  margin-bottom: $spacing-md;
+}
+
+.infoItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.infoLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.infoValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+
+  &.temp {
+    color: $color-cold;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.riskBar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  background: $color-warning-bg;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-md;
+}
+
+.riskDot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: $color-warning;
+  flex-shrink: 0;
+}
+
+.riskText {
+  font-size: $font-size-sm;
+  color: $color-warning;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.confirmBtn {
+  @include button-reset;
+  background: $color-primary;
+  color: $color-text-white;
+  height: $button-height-sm;
+  padding: 0 $spacing-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.confirmBtnText {
+  color: $color-text-white;
+  font-size: $font-size-sm;
+}
