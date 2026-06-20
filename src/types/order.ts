@@ -77,4 +77,28 @@ export interface ConfirmRecord {
   result: NonNullable<ConfirmResult>;
   remark: string;
   time: string;
+  exceptionInfo?: ExceptionInfo;
+}
+
+export interface ExceptionInfo {
+  reason: string;
+  damageQuantity: string;
+  contactPerson: string;
+  contactPhone: string;
+}
+
+export interface RecentQueryItem {
+  orderNo: string;
+  orderId: string;
+  vehicleNo: string;
+  matched: boolean;
+  queryTime: string;
+}
+
+export type CarrierFilter = 'all' | string;
+export type BackupPlanFilter = 'all' | BackupPlan;
+
+export interface RiskAlertFilter {
+  carrier: CarrierFilter;
+  backupPlan: BackupPlanFilter;
 }

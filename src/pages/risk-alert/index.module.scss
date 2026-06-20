@@ -145,7 +145,7 @@
   margin-bottom: $spacing-xs;
 }
 
-emptyDesc {
+.emptyDesc {
   font-size: $font-size-sm;
   color: $color-text-tertiary;
 }
@@ -160,4 +160,99 @@ emptyDesc {
 .loadingText {
   font-size: $font-size-sm;
   color: $color-text-tertiary;
+}
+
+.filterPanel {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin: 0 $page-padding $spacing-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.filterPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.filterPanelTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.filterReset {
+  @include button-reset;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
+  background: $color-bg-page;
+}
+
+.filterResetText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.filterRow {
+  margin-bottom: $spacing-md;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.filterLabel {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  font-weight: $font-weight-medium;
+}
+
+.filterChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.filterChip {
+  @include button-reset;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-button;
+  background: $color-bg-page;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &.chipActive {
+    background: $color-primary-bg;
+    border-color: $color-primary;
+  }
+}
+
+.chipText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+
+  .chipActive & {
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.filterSummary {
+  margin-top: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  background: $color-primary-bg;
+  border-radius: $radius-sm;
+  border-left: 4rpx solid $color-primary;
+}
+
+.filterSummaryText {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+  line-height: 1.5;
 }

@@ -435,3 +435,105 @@
   color: $color-text-primary;
   flex: 1;
 }
+
+.exceptionFollowCard {
+  background: $color-warning-bg;
+  border-radius: $radius-lg;
+  border: 2rpx solid $color-warning;
+  padding: $spacing-lg;
+}
+
+.exceptionFollowHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.exceptionFollowIcon {
+  font-size: 36rpx;
+}
+
+.exceptionFollowTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-warning;
+  flex: 1;
+}
+
+.exceptionFollowBadge {
+  padding: $spacing-xs $spacing-md;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-warning;
+  font-weight: $font-weight-medium;
+}
+
+.exceptionFollowList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.exceptionFollowItem {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: $radius-md;
+}
+
+.exceptionFollowLabel {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+  width: 140rpx;
+}
+
+.exceptionFollowValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  flex: 1;
+  line-height: 1.5;
+}
+
+.exceptionFollowContact {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.exceptionFollowCallBtn {
+  @include button-reset;
+  padding: $spacing-xs $spacing-md;
+  background: $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.exceptionFollowActions {
+  border-top: 2rpx dashed rgba(255, 125, 0, 0.3);
+  padding-top: $spacing-md;
+}
+
+.exceptionFollowHint {
+  padding: $spacing-sm $spacing-md;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: $radius-sm;
+}
+
+.exceptionFollowHintText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}

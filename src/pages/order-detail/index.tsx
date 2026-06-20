@@ -19,7 +19,11 @@ import type { OrderInfo } from '@/types/order';
 const OrderDetailPage: React.FC = () => {
   const router = useRouter();
   const [order, setOrder] = useState<OrderInfo | null>(null);
-  const getConfirmRecord = useOrderStore(state => state.getConfirmRecord);
+
+  const { getConfirmRecord, confirmRecords } = useOrderStore(state => ({
+    getConfirmRecord: state.getConfirmRecord,
+    confirmRecords: state.confirmRecords
+  }));
 
   const loadOrder = () => {
     const id = router.params.id;
@@ -41,12 +45,19 @@ const OrderDetailPage: React.FC = () => {
   const confirmRecord = useMemo(() => {
     if (!order) return undefined;
     return getConfirmRecord(order.id);
-  }, [order, getConfirmRecord]);
+  }, [order, getConfirmRecord, confirmRecords]);
 
   const effectiveConfirmResult = confirmRecord?.result || order?.confirmResult;
   const effectiveConfirmRemark = confirmRecord?.remark || order?.confirmRemark;
   const effectiveConfirmTime = confirmRecord?.time || order?.confirmTime;
+  const effectiveExceptionInfo = confirmRecord?.exceptionInfo;
   const effectiveOrderStatus = confirmRecord ? 'confirmed' as const : order?.orderStatus;
+
+  const hasExceptionInfo = effectiveExceptionInfo
+    && (effectiveExceptionInfo.reason
+      || effectiveExceptionInfo.damageQuantity
+      || effectiveExceptionInfo.contactPerson
+      || effectiveExceptionInfo.contactPhone);
 
   const getStatusClass = (status: string) => {
     if (status === 'normal' || status === 'stable' || status === 'none') return 'normal';
@@ -77,6 +88,16 @@ const OrderDetailPage: React.FC = () => {
     if (!order) return;
     Taro.navigateTo({
       url: `/pages/confirm-arrival/index?id=${order.id}`
+    });
+  };
+
+  const handleCallContact = () => {
+    if (!effectiveExceptionInfo?.contactPhone) return;
+    Taro.makePhoneCall({
+      phoneNumber: effectiveExceptionInfo.contactPhone
+    }).catch(err => {
+      console.error('[OrderDetail] Call fail:', err);
+      Taro.showToast({ title: '拨号失败', icon: 'none' });
     });
   };
 
@@ -270,6 +291,64 @@ const OrderDetailPage: React.FC = () => {
                 <Text className={styles.confirmRemarkText}>{effectiveConfirmRemark}</Text>
               </View>
             )}
+          </View>
+        </View>
+      )}
+
+      {hasExceptionInfo && effectiveExceptionInfo && (
+        <View className={styles.statusSection}>
+          <Text className={styles.sectionTitle}>异常处理跟进</Text>
+          <View className={styles.exceptionFollowCard}>
+            <View className={styles.exceptionFollowHeader}>
+              <Text className={styles.exceptionFollowIcon}>⚠️</Text>
+              <Text className={styles.exceptionFollowTitle}>待跟进</Text>
+              <View className={styles.exceptionFollowBadge}>
+                <Text>{formatConfirmResult(effectiveConfirmResult)}</Text>
+              </View>
+            </View>
+
+            <View className={styles.exceptionFollowList}>
+              <View className={styles.exceptionFollowItem}>
+                <Text className={styles.exceptionFollowLabel}>异常原因</Text>
+                <Text className={styles.exceptionFollowValue}>
+                  {effectiveExceptionInfo.reason || '-'}
+                </Text>
+              </View>
+              {effectiveExceptionInfo.damageQuantity && (
+                <View className={styles.exceptionFollowItem}>
+                  <Text className={styles.exceptionFollowLabel}>货损数量</Text>
+                  <Text className={styles.exceptionFollowValue}>
+                    {effectiveExceptionInfo.damageQuantity}
+                  </Text>
+                </View>
+              )}
+              {effectiveExceptionInfo.contactPerson && (
+                <View className={styles.exceptionFollowItem}>
+                  <Text className={styles.exceptionFollowLabel}>负责人</Text>
+                  <View className={styles.exceptionFollowContact}>
+                    <Text className={styles.exceptionFollowValue}>
+                      {effectiveExceptionInfo.contactPerson}
+                    </Text>
+                    {effectiveExceptionInfo.contactPhone && (
+                      <View
+                        className={styles.exceptionFollowCallBtn}
+                        onClick={handleCallContact}
+                      >
+                        <Text>📞 联系</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              )}
+            </View>
+
+            <View className={styles.exceptionFollowActions}>
+              <View className={styles.exceptionFollowHint}>
+                <Text className={styles.exceptionFollowHintText}>
+                  请门店尽快跟进处理，如有疑问请联系承运方
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
       )}

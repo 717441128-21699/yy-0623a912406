@@ -5,7 +5,7 @@ import styles from './index.module.scss';
 import OrderCard from '@/components/OrderCard';
 import { mockOrders } from '@/data/mockOrders';
 import { useOrderStore } from '@/store/orderStore';
-import type { OrderInfo } from '@/types/order';
+import type { OrderInfo, RecentQueryItem } from '@/types/order';
 
 const EMPTY_SCAN_MARK = '__EMPTY_SCAN_RESULT__';
 
@@ -22,15 +22,38 @@ const OrderQueryPage: React.FC = () => {
     hasSearched,
     searchedOrderNo,
     searchFailed,
+    recentQueries,
     setSearchedOrderNo,
-    clearSearch
+    clearSearch,
+    addRecentQuery,
+    removeRecentQuery,
+    clearRecentQueries
   } = useOrderStore(state => ({
     hasSearched: state.hasSearched,
     searchedOrderNo: state.searchedOrderNo,
     searchFailed: state.searchFailed,
+    recentQueries: state.recentQueries,
     setSearchedOrderNo: state.setSearchedOrderNo,
-    clearSearch: state.clearSearch
+    clearSearch: state.clearSearch,
+    addRecentQuery: state.addRecentQuery,
+    removeRecentQuery: state.removeRecentQuery,
+    clearRecentQueries: state.clearRecentQueries
   }));
+
+  const formatQueryTime = (timeStr: string) => {
+    const now = new Date();
+    const t = new Date(timeStr);
+    const diffMs = now.getTime() - t.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return '刚刚';
+    if (diffMins < 60) return `${diffMins}分钟前`;
+    if (diffHours < 24) return `${diffHours}小时前`;
+    if (diffDays < 7) return `${diffDays}天前`;
+    return t.toLocaleDateString('zh-CN').replace(/\//g, '-');
+  };
 
   const doExactSearch = useCallback((keyword: string) => {
     const trimmedKeyword = keyword.trim();
@@ -53,11 +76,22 @@ const OrderQueryPage: React.FC = () => {
         setOrders(matched);
         setSearchError('');
         setSearchedOrderNo(trimmedKeyword, false);
+
+        matched.forEach(order => {
+          const item: RecentQueryItem = {
+            orderNo: order.orderNo,
+            orderId: order.id,
+            vehicleNo: '',
+            matched: true,
+            queryTime: new Date().toISOString()
+          };
+          addRecentQuery(item);
+        });
       }
 
       setLoading(false);
     }, 300);
-  }, [setSearchedOrderNo]);
+  }, [setSearchedOrderNo, addRecentQuery]);
 
   useEffect(() => {
     if (hasSearched && searchedOrderNo) {
@@ -150,6 +184,13 @@ const OrderQueryPage: React.FC = () => {
           setOrders([matched]);
           setSearchError('');
           setSearchedOrderNo(scanResult, false);
+          addRecentQuery({
+            orderNo: matched.orderNo,
+            orderId: matched.id,
+            vehicleNo: '',
+            matched: true,
+            queryTime: new Date().toISOString()
+          });
           Taro.navigateTo({
             url: `/pages/order-detail/index?id=${matched.id}`
           });
@@ -175,6 +216,29 @@ const OrderQueryPage: React.FC = () => {
     setSearchError('');
     setIsEmptyScan(false);
     clearSearch();
+  };
+
+  const handleRecentClick = (orderNo: string) => {
+    setSearchText(orderNo);
+    doExactSearch(orderNo);
+  };
+
+  const handleRecentRemove = (e: React.MouseEvent, orderNo: string) => {
+    e.stopPropagation();
+    removeRecentQuery(orderNo);
+  };
+
+  const handleClearRecentAll = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    Taro.showModal({
+      title: '清空记录',
+      content: '确定清空所有最近查询记录吗？',
+      success: (res) => {
+        if (res.confirm) {
+          clearRecentQueries();
+        }
+      }
+    });
   };
 
   const shouldShowEmpty = (hasSearched || searchFailed || isEmptyScan) && orders.length === 0 && !loading;
@@ -226,6 +290,38 @@ const OrderQueryPage: React.FC = () => {
               <Text className={styles.tipItem}>• 扫描装车单二维码可直接打开订单详情</Text>
               <Text className={styles.tipItem}>• 仅展示与你相关的订单信息</Text>
             </View>
+
+            {recentQueries.length > 0 && (
+              <View className={styles.recentSection}>
+                <View className={styles.recentHeader}>
+                  <Text className={styles.recentTitle}>最近查询</Text>
+                  <View className={styles.recentClearAll} onClick={handleClearRecentAll}>
+                    <Text className={styles.recentClearAllText}>清空</Text>
+                  </View>
+                </View>
+                <View className={styles.recentList}>
+                  {recentQueries.map(item => (
+                    <View
+                      key={item.orderNo}
+                      className={styles.recentItem}
+                      onClick={() => handleRecentClick(item.orderNo)}
+                    >
+                      <View className={styles.recentIcon}>📋</View>
+                      <View className={styles.recentContent}>
+                        <Text className={styles.recentOrderNo}>{item.orderNo}</Text>
+                        <Text className={styles.recentTime}>{formatQueryTime(item.queryTime)}</Text>
+                      </View>
+                      <View
+                        className={styles.recentRemove}
+                        onClick={(e) => handleRecentRemove(e, item.orderNo)}
+                      >
+                        <Text className={styles.recentRemoveText}>×</Text>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
           </View>
         )}
 
@@ -237,6 +333,9 @@ const OrderQueryPage: React.FC = () => {
               <Text className={styles.emptyDesc}>{searchError}</Text>
             )}
             <Text className={styles.emptyHint}>请检查运单号是否正确，或联系承运方核实</Text>
+            <View className={styles.emptyClearBtn} onClick={handleClearSearch}>
+              <Text className={styles.emptyClearBtnText}>清空查询，重新开始</Text>
+            </View>
           </View>
         )}
 

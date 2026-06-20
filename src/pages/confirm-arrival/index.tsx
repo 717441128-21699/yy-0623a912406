@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, Textarea } from '@tarojs/components';
+import { View, Text, Textarea, Input } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import { mockOrders } from '@/data/mockOrders';
@@ -9,7 +9,12 @@ import {
   formatTemperature,
   formatConfirmResult
 } from '@/utils/format';
-import type { OrderInfo, ConfirmResult, ConfirmRecord } from '@/types/order';
+import type {
+  OrderInfo,
+  ConfirmResult,
+  ConfirmRecord,
+  ExceptionInfo
+} from '@/types/order';
 
 interface ConfirmOption {
   key: NonNullable<ConfirmResult>;
@@ -43,11 +48,19 @@ const options: ConfirmOption[] = [
   }
 ];
 
+const EMPTY_EXCEPTION: ExceptionInfo = {
+  reason: '',
+  damageQuantity: '',
+  contactPerson: '',
+  contactPhone: ''
+};
+
 const ConfirmArrivalPage: React.FC = () => {
   const router = useRouter();
   const [order, setOrder] = useState<OrderInfo | null>(null);
   const [selectedResult, setSelectedResult] = useState<ConfirmResult>(null);
   const [remark, setRemark] = useState('');
+  const [exceptionInfo, setExceptionInfo] = useState<ExceptionInfo>(EMPTY_EXCEPTION);
 
   const { getConfirmRecord, setConfirmRecord } = useOrderStore(state => ({
     getConfirmRecord: state.getConfirmRecord,
@@ -60,11 +73,15 @@ const ConfirmArrivalPage: React.FC = () => {
   }, [order, getConfirmRecord]);
 
   const hasConfirmed = !!confirmRecord;
+  const showExceptionForm = selectedResult === 'pending' || selectedResult === 'rejected';
 
   useEffect(() => {
     if (confirmRecord) {
       setSelectedResult(confirmRecord.result);
       setRemark(confirmRecord.remark);
+      if (confirmRecord.exceptionInfo) {
+        setExceptionInfo(confirmRecord.exceptionInfo);
+      }
     }
   }, [confirmRecord]);
 
@@ -87,6 +104,9 @@ const ConfirmArrivalPage: React.FC = () => {
   const handleSelect = (key: NonNullable<ConfirmResult>) => {
     if (hasConfirmed) return;
     setSelectedResult(key);
+    if (key === 'normal') {
+      setExceptionInfo(EMPTY_EXCEPTION);
+    }
   };
 
   const handleRemarkChange = (e: any) => {
@@ -97,6 +117,11 @@ const ConfirmArrivalPage: React.FC = () => {
     }
   };
 
+  const handleExceptionChange = (field: keyof ExceptionInfo, value: string) => {
+    if (hasConfirmed) return;
+    setExceptionInfo(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = () => {
     if (!selectedResult) {
       Taro.showToast({
@@ -104,6 +129,16 @@ const ConfirmArrivalPage: React.FC = () => {
         icon: 'none'
       });
       return;
+    }
+
+    if (showExceptionForm) {
+      if (!exceptionInfo.reason.trim()) {
+        Taro.showToast({
+          title: '请填写异常原因',
+          icon: 'none'
+        });
+        return;
+      }
     }
 
     Taro.showModal({
@@ -121,7 +156,8 @@ const ConfirmArrivalPage: React.FC = () => {
               day: '2-digit',
               hour: '2-digit',
               minute: '2-digit'
-            }).replace(/\//g, '-')
+            }).replace(/\//g, '-'),
+            exceptionInfo: showExceptionForm ? { ...exceptionInfo } : undefined
           };
 
           console.log('[ConfirmArrival] submit record:', record);
@@ -156,6 +192,12 @@ const ConfirmArrivalPage: React.FC = () => {
     return 'rejected';
   };
 
+  const hasExceptionInfo = confirmRecord?.exceptionInfo
+    && (confirmRecord.exceptionInfo.reason
+      || confirmRecord.exceptionInfo.damageQuantity
+      || confirmRecord.exceptionInfo.contactPerson
+      || confirmRecord.exceptionInfo.contactPhone);
+
   if (hasConfirmed && confirmRecord) {
     return (
       <View className={styles.page}>
@@ -179,6 +221,36 @@ const ConfirmArrivalPage: React.FC = () => {
             </View>
           )}
         </View>
+
+        {hasExceptionInfo && confirmRecord.exceptionInfo && (
+          <View className={styles.exceptionCard}>
+            <View className={styles.exceptionHeader}>
+              <Text className={styles.exceptionIcon}>⚠️</Text>
+              <Text className={styles.cardTitle}>异常处理信息</Text>
+            </View>
+            <View className={styles.exceptionDetailList}>
+              <View className={styles.exceptionDetailItem}>
+                <Text className={styles.exceptionDetailLabel}>异常原因</Text>
+                <Text className={styles.exceptionDetailValue}>{confirmRecord.exceptionInfo.reason || '-'}</Text>
+              </View>
+              {confirmRecord.exceptionInfo.damageQuantity && (
+                <View className={styles.exceptionDetailItem}>
+                  <Text className={styles.exceptionDetailLabel}>货损数量</Text>
+                  <Text className={styles.exceptionDetailValue}>{confirmRecord.exceptionInfo.damageQuantity}</Text>
+                </View>
+              )}
+              {confirmRecord.exceptionInfo.contactPerson && (
+                <View className={styles.exceptionDetailItem}>
+                  <Text className={styles.exceptionDetailLabel}>联系人</Text>
+                  <Text className={styles.exceptionDetailValue}>
+                    {confirmRecord.exceptionInfo.contactPerson}
+                    {confirmRecord.exceptionInfo.contactPhone && `（${confirmRecord.exceptionInfo.contactPhone}）`}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
       </View>
     );
   }
@@ -260,6 +332,67 @@ const ConfirmArrivalPage: React.FC = () => {
           ))}
         </View>
       </View>
+
+      {showExceptionForm && (
+        <View className={styles.exceptionCard}>
+          <View className={styles.exceptionHeader}>
+            <Text className={styles.exceptionIcon}>⚠️</Text>
+            <Text className={styles.cardTitle}>异常处理信息</Text>
+          </View>
+          <View className={styles.exceptionFormList}>
+            <View className={styles.exceptionFormItem}>
+              <Text className={styles.exceptionFormLabel}>异常原因 <Text className={styles.required}>*</Text></Text>
+              <Textarea
+                className={styles.exceptionFormTextarea}
+                placeholder="请详细描述异常情况，如货物外观异常、温度过高、包装破损等..."
+                placeholderStyle="color: #c9cdd4"
+                value={exceptionInfo.reason}
+                onInput={(e) => handleExceptionChange('reason', e.detail.value)}
+                maxlength={300}
+                autoHeight
+              />
+              <Text className={styles.exceptionFormCount}>{exceptionInfo.reason.length}/300</Text>
+            </View>
+
+            <View className={styles.exceptionFormItem}>
+              <Text className={styles.exceptionFormLabel}>货损数量（选填）</Text>
+              <Input
+                className={styles.exceptionFormInput}
+                placeholder="例如：5箱、10公斤"
+                placeholderStyle="color: #c9cdd4"
+                value={exceptionInfo.damageQuantity}
+                onInput={(e) => handleExceptionChange('damageQuantity', e.detail.value)}
+                maxlength={50}
+              />
+            </View>
+
+            <View className={styles.exceptionFormItem}>
+              <Text className={styles.exceptionFormLabel}>联系人（选填）</Text>
+              <Input
+                className={styles.exceptionFormInput}
+                placeholder="负责跟进异常的联系人姓名"
+                placeholderStyle="color: #c9cdd4"
+                value={exceptionInfo.contactPerson}
+                onInput={(e) => handleExceptionChange('contactPerson', e.detail.value)}
+                maxlength={50}
+              />
+            </View>
+
+            <View className={styles.exceptionFormItem}>
+              <Text className={styles.exceptionFormLabel}>联系电话（选填）</Text>
+              <Input
+                className={styles.exceptionFormInput}
+                type="number"
+                placeholder="联系人手机号"
+                placeholderStyle="color: #c9cdd4"
+                value={exceptionInfo.contactPhone}
+                onInput={(e) => handleExceptionChange('contactPhone', e.detail.value)}
+                maxlength={20}
+              />
+            </View>
+          </View>
+        </View>
+      )}
 
       <View className={styles.remarkCard}>
         <Text className={styles.cardTitle}>备注说明（选填）</Text>
