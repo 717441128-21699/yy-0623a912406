@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, Input, ScrollView } from '@tarojs/components';
 import Taro, { useDidShow, usePullDownRefresh } from '@tarojs/taro';
 import styles from './index.module.scss';
@@ -7,36 +7,39 @@ import { mockOrders } from '@/data/mockOrders';
 import { useOrderStore } from '@/store/orderStore';
 import type { OrderInfo } from '@/types/order';
 
+const EMPTY_MARK = '__EMPTY_SCAN_RESULT__';
+
 const OrderQueryPage: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [orders, setOrders] = useState<OrderInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchError, setSearchError] = useState('');
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     hasSearched,
     searchedOrderNo,
+    searchFailed,
     setSearchedOrderNo,
-    setHasSearched
+    setSearchFailed,
+    clearSearch
   } = useOrderStore(state => ({
     hasSearched: state.hasSearched,
     searchedOrderNo: state.searchedOrderNo,
+    searchFailed: state.searchFailed,
     setSearchedOrderNo: state.setSearchedOrderNo,
-    setHasSearched: state.setHasSearched
+    setSearchFailed: state.setSearchFailed,
+    clearSearch: state.clearSearch
   }));
 
-  useEffect(() => {
-    if (hasSearched && searchedOrderNo) {
-      setSearchText(searchedOrderNo);
-      doSearch(searchedOrderNo);
-    }
-  }, []);
+  const doExactSearch = useCallback((keyword: string, fromScan = false) => {
+    const trimmedKeyword = keyword.trim();
+    const isEmptyScan = fromScan && trimmedKeyword === '';
 
-  const doSearch = useCallback((keyword: string) => {
-    if (!keyword.trim()) {
+    if (!isEmptyScan && trimmedKeyword === '') {
       setOrders([]);
       setSearchError('');
-      setHasSearched(false);
+      clearSearch();
       return;
     }
 
@@ -44,50 +47,81 @@ const OrderQueryPage: React.FC = () => {
     setSearchError('');
 
     setTimeout(() => {
-      const searchKeyword = keyword.trim().toUpperCase();
-      const matched = mockOrders.filter(o =>
-        o.orderNo.toUpperCase() === searchKeyword ||
-        o.orderNo.toUpperCase().includes(searchKeyword) ||
-        o.vehicleNo.toUpperCase().includes(searchKeyword)
-      );
+      let matched: OrderInfo[] = [];
+
+      if (!isEmptyScan) {
+        const upperKeyword = trimmedKeyword.toUpperCase();
+        matched = mockOrders.filter(o =>
+          o.orderNo.toUpperCase() === upperKeyword
+        );
+      }
 
       if (matched.length === 0) {
         setOrders([]);
-        setSearchError(`未找到运单号"${keyword.trim()}"相关的车辆信息`);
+        if (isEmptyScan) {
+          setSearchError('未获取到有效扫码内容，请重试');
+        } else {
+          setSearchError(`未找到运单号"${trimmedKeyword}"相关的车辆信息`);
+        }
+        setSearchedOrderNo(isEmptyScan ? EMPTY_MARK : trimmedKeyword, true);
       } else {
         setOrders(matched);
         setSearchError('');
+        setSearchedOrderNo(trimmedKeyword, false);
       }
+
       setLoading(false);
-      setHasSearched(true);
-      setSearchedOrderNo(keyword.trim());
     }, 300);
-  }, [setHasSearched, setSearchedOrderNo]);
+  }, [clearSearch, setSearchedOrderNo]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchText.trim()) {
-        doSearch(searchText);
-      } else {
-        setOrders([]);
-        setSearchError('');
-        setHasSearched(false);
-      }
+    if (hasSearched && searchedOrderNo && searchedOrderNo !== EMPTY_MARK) {
+      setSearchText(searchedOrderNo);
+      doExactSearch(searchedOrderNo);
+    }
+    if (searchedOrderNo === EMPTY_MARK) {
+      setSearchText('');
+      setOrders([]);
+      setSearchError('未获取到有效扫码内容，请重试');
+      setSearchFailed(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+
+    const trimmed = searchText.trim();
+    if (trimmed === '') {
+      setOrders([]);
+      setSearchError('');
+      clearSearch();
+      return;
+    }
+
+    searchTimerRef.current = setTimeout(() => {
+      doExactSearch(searchText);
     }, 500);
-    return () => clearTimeout(timer);
-  }, [searchText, doSearch, setHasSearched]);
+
+    return () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    };
+  }, [searchText, doExactSearch, clearSearch]);
 
   useDidShow(() => {
-    if (hasSearched && searchedOrderNo) {
-      doSearch(searchedOrderNo);
+    if (hasSearched && searchedOrderNo && searchedOrderNo !== EMPTY_MARK) {
+      doExactSearch(searchedOrderNo);
     }
   });
 
   usePullDownRefresh(handlePullDownRefresh);
 
   function handlePullDownRefresh() {
-    if (searchText.trim()) {
-      doSearch(searchText);
+    if (hasSearched && searchedOrderNo && searchedOrderNo !== EMPTY_MARK) {
+      doExactSearch(searchedOrderNo);
     }
     setTimeout(() => {
       Taro.stopPullDownRefresh();
@@ -106,30 +140,35 @@ const OrderQueryPage: React.FC = () => {
           setSearchText('');
           setOrders([]);
           setSearchError('未获取到有效扫码内容，请重试');
-          setHasSearched(true);
-          setSearchedOrderNo('');
+          setSearchedOrderNo(EMPTY_MARK, true);
           return;
         }
 
         setSearchText(scanResult);
 
-        const matched = mockOrders.find(o =>
-          o.orderNo.toUpperCase() === scanResult.toUpperCase() ||
-          scanResult.toUpperCase().includes(o.orderNo.toUpperCase())
+        const upperScan = scanResult.toUpperCase();
+        const exactMatched = mockOrders.find(o =>
+          o.orderNo.toUpperCase() === upperScan
         );
+
+        const containedMatched = mockOrders.find(o =>
+          upperScan.includes(o.orderNo.toUpperCase())
+        );
+
+        const matched = exactMatched || containedMatched;
 
         if (matched) {
           console.log('[OrderQuery] scan matched, navigate to detail:', matched.orderNo);
+          setOrders([matched]);
+          setSearchError('');
+          setSearchedOrderNo(scanResult, false);
           Taro.navigateTo({
             url: `/pages/order-detail/index?id=${matched.id}`
           });
-          setHasSearched(true);
-          setSearchedOrderNo(scanResult);
         } else {
           setOrders([]);
           setSearchError(`扫码内容"${scanResult}"未匹配到任何订单`);
-          setHasSearched(true);
-          setSearchedOrderNo(scanResult);
+          setSearchedOrderNo(scanResult, true);
         }
       },
       fail: (err) => {
@@ -146,12 +185,12 @@ const OrderQueryPage: React.FC = () => {
     setSearchText('');
     setOrders([]);
     setSearchError('');
-    setHasSearched(false);
+    clearSearch();
   };
 
-  const shouldShowInitial = !hasSearched;
-  const shouldShowEmpty = hasSearched && orders.length === 0 && !loading;
-  const shouldShowResults = hasSearched && orders.length > 0 && !loading;
+  const shouldShowEmpty = (hasSearched || searchFailed) && orders.length === 0 && !loading;
+  const shouldShowInitial = !hasSearched && !searchFailed && !loading;
+  const shouldShowResults = hasSearched && !searchFailed && orders.length > 0 && !loading;
 
   return (
     <View className={styles.page}>
@@ -162,12 +201,12 @@ const OrderQueryPage: React.FC = () => {
             <Text className={styles.searchIcon}>🔍</Text>
             <Input
               className={styles.searchInput}
-              placeholder="请输入运单号"
+              placeholder="请输入完整运单号"
               placeholderStyle="color: rgba(255,255,255,0.6)"
               value={searchText}
               onInput={(e) => setSearchText(e.detail.value)}
               confirmType="search"
-              onConfirm={(e) => doSearch(e.detail.value)}
+              onConfirm={(e) => doExactSearch(e.detail.value)}
             />
             {searchText && (
               <View className={styles.clearBtn} onClick={handleClearSearch}>
@@ -191,11 +230,11 @@ const OrderQueryPage: React.FC = () => {
         {shouldShowInitial && !loading && (
           <View className={styles.initial}>
             <View className={styles.initialIcon}>🔍</View>
-            <Text className={styles.initialTitle}>输入运单号或扫码查询</Text>
-            <Text className={styles.initialDesc}>支持手动输入运单号或扫描装车单二维码</Text>
+            <Text className={styles.initialTitle}>输入完整运单号或扫码查询</Text>
+            <Text className={styles.initialDesc}>请输入完整运单号精确匹配，或扫描装车单二维码</Text>
             <View className={styles.initialTips}>
-              <Text className={styles.tipItem}>• 输入完整运单号可快速定位</Text>
-              <Text className={styles.tipItem}>• 扫描装车单二维码直达详情</Text>
+              <Text className={styles.tipItem}>• 请输入完整运单号进行精确查询</Text>
+              <Text className={styles.tipItem}>• 扫描装车单二维码可直接打开订单详情</Text>
               <Text className={styles.tipItem}>• 仅展示与你相关的订单信息</Text>
             </View>
           </View>
