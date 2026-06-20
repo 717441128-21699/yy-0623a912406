@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, Textarea } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import { mockOrders } from '@/data/mockOrders';
+import { useOrderStore } from '@/store/orderStore';
 import {
   formatDuration,
   formatTemperature,
   formatConfirmResult
 } from '@/utils/format';
-import type { OrderInfo, ConfirmResult } from '@/types/order';
+import type { OrderInfo, ConfirmResult, ConfirmRecord } from '@/types/order';
 
 interface ConfirmOption {
   key: NonNullable<ConfirmResult>;
@@ -47,18 +48,31 @@ const ConfirmArrivalPage: React.FC = () => {
   const [order, setOrder] = useState<OrderInfo | null>(null);
   const [selectedResult, setSelectedResult] = useState<ConfirmResult>(null);
   const [remark, setRemark] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+
+  const { getConfirmRecord, setConfirmRecord } = useOrderStore(state => ({
+    getConfirmRecord: state.getConfirmRecord,
+    setConfirmRecord: state.setConfirmRecord
+  }));
+
+  const confirmRecord = useMemo(() => {
+    if (!order) return undefined;
+    return getConfirmRecord(order.id);
+  }, [order, getConfirmRecord]);
+
+  const hasConfirmed = !!confirmRecord;
+
+  useEffect(() => {
+    if (confirmRecord) {
+      setSelectedResult(confirmRecord.result);
+      setRemark(confirmRecord.remark);
+    }
+  }, [confirmRecord]);
 
   const loadOrder = () => {
     const id = router.params.id;
     const found = mockOrders.find(o => o.id === id);
     if (found) {
       setOrder(found);
-      if (found.confirmResult) {
-        setSubmitted(true);
-        setSelectedResult(found.confirmResult);
-        setRemark(found.confirmRemark || '');
-      }
     }
   };
 
@@ -71,12 +85,12 @@ const ConfirmArrivalPage: React.FC = () => {
   });
 
   const handleSelect = (key: NonNullable<ConfirmResult>) => {
-    if (submitted) return;
+    if (hasConfirmed) return;
     setSelectedResult(key);
   };
 
   const handleRemarkChange = (e: any) => {
-    if (submitted) return;
+    if (hasConfirmed) return;
     const value = e.detail.value;
     if (value.length <= 200) {
       setRemark(value);
@@ -97,12 +111,27 @@ const ConfirmArrivalPage: React.FC = () => {
       content: `确认选择"${formatConfirmResult(selectedResult)}"吗？`,
       success: (res) => {
         if (res.confirm) {
-          console.log('[ConfirmArrival] submit:', { result: selectedResult, remark });
+          const record: ConfirmRecord = {
+            orderId: order!.id,
+            result: selectedResult,
+            remark: remark,
+            time: new Date().toLocaleString('zh-CN', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            }).replace(/\//g, '-')
+          };
+
+          console.log('[ConfirmArrival] submit record:', record);
+          setConfirmRecord(order!.id, record);
+
           Taro.showToast({
             title: '提交成功',
             icon: 'success'
           });
-          setSubmitted(true);
+
           setTimeout(() => {
             Taro.navigateBack();
           }, 1500);
@@ -121,13 +150,13 @@ const ConfirmArrivalPage: React.FC = () => {
     );
   }
 
-  const getResultTagClass = () => {
-    if (selectedResult === 'normal') return 'normal';
-    if (selectedResult === 'pending') return 'pending';
+  const getResultTagClass = (result: ConfirmResult) => {
+    if (result === 'normal') return 'normal';
+    if (result === 'pending') return 'pending';
     return 'rejected';
   };
 
-  if (submitted && order.confirmResult) {
+  if (hasConfirmed && confirmRecord) {
     return (
       <View className={styles.page}>
         <View className={styles.orderHeader}>
@@ -140,13 +169,13 @@ const ConfirmArrivalPage: React.FC = () => {
         <View className={styles.confirmedCard}>
           <Text className={styles.confirmedIcon}>✅</Text>
           <Text className={styles.confirmedTitle}>已完成确认</Text>
-          <Text className={styles.confirmedSubtitle}>确认时间：{order.confirmTime || '--'}</Text>
-          <View className={`${styles.confirmedResult} ${styles[getResultTagClass()]}`}>
-            <Text>{formatConfirmResult(order.confirmResult)}</Text>
+          <Text className={styles.confirmedSubtitle}>确认时间：{confirmRecord.time}</Text>
+          <View className={`${styles.confirmedResult} ${styles[getResultTagClass(confirmRecord.result)]}`}>
+            <Text>{formatConfirmResult(confirmRecord.result)}</Text>
           </View>
-          {order.confirmRemark && (
+          {confirmRecord.remark && (
             <View className={styles.confirmedRemark}>
-              <Text>备注：{order.confirmRemark}</Text>
+              <Text>备注：{confirmRecord.remark}</Text>
             </View>
           )}
         </View>

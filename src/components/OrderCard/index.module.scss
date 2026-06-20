@@ -171,3 +171,15 @@
   color: $color-text-white;
   font-size: $font-size-sm;
 }
+
+.confirmedLabel {
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-button;
+  background: $color-success-bg;
+}
+
+.confirmedLabelText {
+  font-size: $font-size-sm;
+  color: $color-success;
+  font-weight: $font-weight-medium;
+}

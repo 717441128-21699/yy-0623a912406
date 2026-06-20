@@ -35,26 +35,66 @@ const RiskCard: React.FC<RiskCardProps> = ({ order, onClick }) => {
   };
 
   const levelStyle = getRiskLevelStyle();
+  const advice = order.riskAdvice;
+
+  const getConclusionText = () => {
+    if (order.powerStatus === 'off') {
+      return `车辆已断电 ${formatDuration(order.powerOffDuration)}`;
+    }
+    if (order.powerStatus === 'warning') {
+      return `电压波动，断电 ${formatDuration(order.powerOffDuration)} 后已恢复`;
+    }
+    return `曾断电 ${formatDuration(order.powerOffDuration)}，目前运行正常`;
+  };
+
+  const getBackupPlanIcon = () => {
+    if (!advice) return 'ℹ️';
+    switch (advice.backupPlan) {
+      case 'prepare': return '⚠️';
+      case 'standby': return '💡';
+      default: return '✅';
+    }
+  };
 
   return (
     <View className={`${styles.card} ${levelStyle.bg}`} style={{ borderLeftColor: levelStyle.borderColor }} onClick={handleClick}>
       <View className={styles.header}>
-        <View className={styles.titleRow}>
+        <View className={styles.conclusionRow}>
           <View className={styles.alertIcon}>!</View>
-          <Text className={styles.title}>
-            {order.powerStatus === 'off' ? '车辆已断电' : '温度异常波动'}
-          </Text>
+          <Text className={styles.conclusion}>{getConclusionText()}</Text>
         </View>
         <Text className={styles.time}>
           {order.events.length > 0 ? order.events[0].startTime.slice(11) : '--'}
         </Text>
       </View>
 
-      <View className={styles.content}>
-        <Text className={styles.desc}>
-          {order.handlingDescription || '正在核实情况，请稍候...'}
-        </Text>
-      </View>
+      {advice && (
+        <View className={styles.adviceSection}>
+          <View className={styles.adviceItem}>
+            <Text className={styles.adviceIcon}>👤</Text>
+            <View className={styles.adviceContent}>
+              <Text className={styles.adviceLabel}>承运方</Text>
+              <Text className={styles.adviceText}>{advice.carrierAction}</Text>
+            </View>
+          </View>
+
+          <View className={styles.adviceItem}>
+            <Text className={styles.adviceIcon}>⏰</Text>
+            <View className={styles.adviceContent}>
+              <Text className={styles.adviceLabel}>预计恢复</Text>
+              <Text className={styles.adviceText}>{advice.estimatedRecoveryTime}</Text>
+            </View>
+          </View>
+
+          <View className={styles.adviceItem}>
+            <Text className={styles.adviceIcon}>{getBackupPlanIcon()}</Text>
+            <View className={styles.adviceContent}>
+              <Text className={styles.adviceLabel}>收货建议</Text>
+              <Text className={styles.adviceText}>{advice.backupPlanText}</Text>
+            </View>
+          </View>
+        </View>
+      )}
 
       <View className={styles.stats}>
         <View className={styles.statItem}>
@@ -72,7 +112,7 @@ const RiskCard: React.FC<RiskCardProps> = ({ order, onClick }) => {
       </View>
 
       <View className={styles.footer}>
-        <Text className={styles.hint}>点击查看详情</Text>
+        <Text className={styles.hint}>点击查看完整温度曲线和处置记录</Text>
         <View className={styles.arrow}>›</View>
       </View>
     </View>

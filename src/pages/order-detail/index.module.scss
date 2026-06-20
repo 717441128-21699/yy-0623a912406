@@ -341,3 +341,97 @@
 .btnText {
   font-size: $font-size-md;
 }
+
+.adviceSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.adviceItem {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+}
+
+.adviceIcon {
+  font-size: 28rpx;
+  width: 40rpx;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.adviceContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.adviceLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.adviceText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.5;
+}
+
+.confirmResult {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.confirmResultBadge {
+  align-self: flex-start;
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $radius-button;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+
+  &.normal {
+    background: $color-success-bg;
+    color: $color-success;
+  }
+
+  &.pending {
+    background: $color-warning-bg;
+    color: $color-warning;
+  }
+
+  &.rejected {
+    background: $color-error-bg;
+    color: $color-error;
+  }
+}
+
+.confirmTime {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.confirmRemark {
+  display: flex;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  line-height: 1.6;
+}
+
+.confirmRemarkLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.confirmRemarkText {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  flex: 1;
+}

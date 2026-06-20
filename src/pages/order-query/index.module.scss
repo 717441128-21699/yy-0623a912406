@@ -51,6 +51,25 @@
   background: transparent;
 }
 
+.clearBtn {
+  @include button-reset;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: $spacing-sm;
+}
+
+.clearIcon {
+  font-size: $font-size-lg;
+  color: $color-text-white;
+  line-height: 1;
+  font-weight: $font-weight-bold;
+}
+
 .scanBtn {
   @include button-reset;
   width: 80rpx;
@@ -72,41 +91,6 @@
   color: $color-text-white;
 }
 
-.filterTabs {
-  display: flex;
-  background: $color-bg-card;
-  padding: $spacing-sm;
-  margin: -$spacing-md $page-padding $spacing-md;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-card;
-  position: relative;
-  z-index: 10;
-}
-
-.filterTab {
-  flex: 1;
-  height: 64rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: $radius-md;
-  transition: all $transition-base;
-
-  &.active {
-    background: $color-primary-bg;
-
-    .tabText {
-      color: $color-primary;
-      font-weight: $font-weight-semibold;
-    }
-  }
-}
-
-.tabText {
-  font-size: $font-size-sm;
-  color: $color-text-secondary;
-}
-
 .list {
   padding: 0 $page-padding;
   padding-bottom: 40rpx;
@@ -117,6 +101,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: $spacing-md;
+  margin-top: $spacing-md;
 }
 
 .listTitleText {
@@ -130,18 +115,78 @@
   color: $color-text-tertiary;
 }
 
+.initial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx $spacing-lg;
+}
+
+.initialIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-lg;
+  opacity: 0.4;
+}
+
+.initialTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.initialDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xl;
+}
+
+.initialTips {
+  width: 100%;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.tipItem {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 2;
+}
+
 .empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 120rpx 0;
+  padding: 120rpx $spacing-lg;
 }
 
 .emptyIcon {
   font-size: 100rpx;
   margin-bottom: $spacing-md;
   opacity: 0.3;
+}
+
+.emptyTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.emptyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  text-align: center;
+}
+
+.emptyHint {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
 }
 
 .emptyText {

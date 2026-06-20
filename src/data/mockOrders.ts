@@ -74,7 +74,14 @@ export const mockOrders: OrderInfo[] = [
       { time: '05:30', temperature: 6.5 },
       { time: '06:00', temperature: 6.8 }
     ],
-    handlingDescription: '承运方正在联系司机，预计20分钟内可恢复供电。温度仍在安全范围内，建议持续关注。'
+    handlingDescription: '承运方正在联系司机，预计20分钟内可恢复供电。温度仍在安全范围内，建议持续关注。',
+    riskAdvice: {
+      powerOffDuration: 12,
+      carrierAction: '承运方调度正在联系司机前往现场重启发电机',
+      estimatedRecoveryTime: '预计 06:20 前恢复供电',
+      backupPlan: 'prepare',
+      backupPlanText: '建议准备备用收货方案，如联系附近冷库临时中转'
+    }
   },
   {
     id: '3',
@@ -117,7 +124,14 @@ export const mockOrders: OrderInfo[] = [
       { time: '04:00', temperature: -19.5 },
       { time: '06:00', temperature: -19.3 }
     ],
-    handlingDescription: '夜间短暂断电18分钟，系司机服务区休息导致。最高温度-17.2℃，未超-15℃安全阈值，货物品质不受影响。'
+    handlingDescription: '夜间短暂断电18分钟，系司机服务区休息导致。最高温度-17.2℃，未超-15℃安全阈值，货物品质不受影响。',
+    riskAdvice: {
+      powerOffDuration: 18,
+      carrierAction: '已恢复供电，冷机正常运行中',
+      estimatedRecoveryTime: '已于 01:33 恢复供电',
+      backupPlan: 'none',
+      backupPlanText: '无需准备备用方案，可正常收货'
+    }
   },
   {
     id: '4',
@@ -193,7 +207,14 @@ export const mockOrders: OrderInfo[] = [
       { time: '05:00', temperature: -16.5 },
       { time: '06:00', temperature: -16.8 }
     ],
-    handlingDescription: '凌晨发生电压波动导致冷机短暂停机8分钟，已自动恢复。温度有波动但仍在安全范围，持续监控中。'
+    handlingDescription: '凌晨发生电压波动导致冷机短暂停机8分钟，已自动恢复。温度有波动但仍在安全范围，持续监控中。',
+    riskAdvice: {
+      powerOffDuration: 8,
+      carrierAction: '已自动恢复供电，安排维修人员跟车检查',
+      estimatedRecoveryTime: '已于 03:53 恢复供电',
+      backupPlan: 'standby',
+      backupPlanText: '建议做好备用方案准备，暂无需行动'
+    }
   },
   {
     id: '6',

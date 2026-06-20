@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
 import StatusBadge from '@/components/StatusBadge';
-import { formatOrderStatus, formatTemperature, formatDuration } from '@/utils/format';
+import { formatOrderStatus, formatTemperature, formatDuration, formatConfirmResult } from '@/utils/format';
+import { useOrderStore } from '@/store/orderStore';
 import type { OrderInfo } from '@/types/order';
 
 interface OrderCardProps {
@@ -13,6 +14,16 @@ interface OrderCardProps {
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({ order, showConfirmBtn = false, onClick }) => {
+  const { getConfirmRecord } = useOrderStore(state => ({
+    getConfirmRecord: state.getConfirmRecord
+  }));
+
+  const confirmRecord = useMemo(() => {
+    return getConfirmRecord(order.id);
+  }, [order.id, getConfirmRecord]);
+
+  const effectiveStatus = confirmRecord ? 'confirmed' as const : order.orderStatus;
+
   const handleClick = () => {
     if (onClick) {
       onClick();
@@ -43,11 +54,19 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, showConfirmBtn = false, on
           <Text className={styles.label}>运单号</Text>
           <Text className={styles.no}>{order.orderNo}</Text>
         </View>
-        <StatusBadge
-          text={formatOrderStatus(order.orderStatus)}
-          status={order.orderStatus === 'transit' ? 'info' : 'normal'}
-          size="small"
-        />
+        {confirmRecord ? (
+          <StatusBadge
+            text={formatConfirmResult(confirmRecord.result)}
+            status={confirmRecord.result === 'normal' ? 'success' : confirmRecord.result === 'pending' ? 'warning' : 'error'}
+            size="small"
+          />
+        ) : (
+          <StatusBadge
+            text={formatOrderStatus(order.orderStatus)}
+            status={order.orderStatus === 'transit' ? 'info' : 'normal'}
+            size="small"
+          />
+        )}
       </View>
 
       <View className={styles.route}>
@@ -94,9 +113,14 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, showConfirmBtn = false, on
           status={getRiskStatus()}
           size="small"
         />
-        {showConfirmBtn && order.orderStatus === 'arrived' && (
+        {showConfirmBtn && effectiveStatus === 'arrived' && !confirmRecord && (
           <View className={styles.confirmBtn} onClick={handleConfirm}>
             <Text className={styles.confirmBtnText}>去确认</Text>
+          </View>
+        )}
+        {confirmRecord && (
+          <View className={styles.confirmedLabel}>
+            <Text className={styles.confirmedLabelText}>已确认</Text>
           </View>
         )}
       </View>

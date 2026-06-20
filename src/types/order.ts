@@ -8,6 +8,8 @@ export type RiskLevel = 'none' | 'low' | 'medium' | 'high';
 
 export type ConfirmResult = 'normal' | 'pending' | 'rejected' | null;
 
+export type BackupPlan = 'prepare' | 'standby' | 'none';
+
 export interface TemperaturePoint {
   time: string;
   temperature: number;
@@ -20,6 +22,14 @@ export interface PowerEvent {
   duration: number;
   type: 'power_off' | 'recovery';
   description: string;
+}
+
+export interface RiskAdvice {
+  powerOffDuration: number;
+  carrierAction: string;
+  estimatedRecoveryTime: string;
+  backupPlan: BackupPlan;
+  backupPlanText: string;
 }
 
 export interface OrderInfo {
@@ -47,6 +57,7 @@ export interface OrderInfo {
   events: PowerEvent[];
   temperaturePoints: TemperaturePoint[];
   handlingDescription?: string;
+  riskAdvice?: RiskAdvice;
   confirmResult?: ConfirmResult;
   confirmRemark?: string;
   confirmTime?: string;
@@ -59,4 +70,11 @@ export interface UserInfo {
   role: 'warehouse' | 'store';
   roleName: string;
   company: string;
+}
+
+export interface ConfirmRecord {
+  orderId: string;
+  result: NonNullable<ConfirmResult>;
+  remark: string;
+  time: string;
 }

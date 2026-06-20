@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import StatusBadge from '@/components/StatusBadge';
 import TempChart from '@/components/TempChart';
 import { mockOrders } from '@/data/mockOrders';
+import { useOrderStore } from '@/store/orderStore';
 import {
   formatPowerStatus,
   formatTempStatus,
@@ -18,6 +19,7 @@ import type { OrderInfo } from '@/types/order';
 const OrderDetailPage: React.FC = () => {
   const router = useRouter();
   const [order, setOrder] = useState<OrderInfo | null>(null);
+  const getConfirmRecord = useOrderStore(state => state.getConfirmRecord);
 
   const loadOrder = () => {
     const id = router.params.id;
@@ -36,10 +38,29 @@ const OrderDetailPage: React.FC = () => {
     loadOrder();
   });
 
+  const confirmRecord = useMemo(() => {
+    if (!order) return undefined;
+    return getConfirmRecord(order.id);
+  }, [order, getConfirmRecord]);
+
+  const effectiveConfirmResult = confirmRecord?.result || order?.confirmResult;
+  const effectiveConfirmRemark = confirmRecord?.remark || order?.confirmRemark;
+  const effectiveConfirmTime = confirmRecord?.time || order?.confirmTime;
+  const effectiveOrderStatus = confirmRecord ? 'confirmed' as const : order?.orderStatus;
+
   const getStatusClass = (status: string) => {
     if (status === 'normal' || status === 'stable' || status === 'none') return 'normal';
     if (status === 'warning' || status === 'fluctuating' || status === 'low' || status === 'medium') return 'warning';
     return 'error';
+  };
+
+  const getBackupPlanIcon = () => {
+    if (!order?.riskAdvice) return 'ℹ️';
+    switch (order.riskAdvice.backupPlan) {
+      case 'prepare': return '⚠️';
+      case 'standby': return '💡';
+      default: return '✅';
+    }
   };
 
   const handleCallDriver = () => {
@@ -47,7 +68,7 @@ const OrderDetailPage: React.FC = () => {
     Taro.makePhoneCall({
       phoneNumber: order.driverPhone.replace(/\*/g, '0')
     }).catch(err => {
-      console.error('[Call fail:', err);
+      console.error('[OrderDetail] Call fail:', err);
       Taro.showToast({ title: '拨号失败', icon: 'none' });
     });
   };
@@ -75,8 +96,8 @@ const OrderDetailPage: React.FC = () => {
         <View className={styles.orderNo}>
           <Text className={styles.orderNoText}>{order.orderNo}</Text>
           <StatusBadge
-            text={formatOrderStatus(order.orderStatus)}
-            status={order.orderStatus === 'transit' ? 'info' : 'normal'}
+            text={formatOrderStatus(effectiveOrderStatus || order.orderStatus)}
+            status={(effectiveOrderStatus || order.orderStatus) === 'transit' ? 'info' : 'normal'}
             size="small"
           />
         </View>
@@ -161,6 +182,51 @@ const OrderDetailPage: React.FC = () => {
         <TempChart points={order.temperaturePoints} targetTemp={order.targetTemp} />
       </View>
 
+      {order.riskAdvice && order.powerOffDuration > 0 && (
+        <View className={styles.statusSection}>
+          <Text className={styles.sectionTitle}>风险处置与建议</Text>
+          <View className={styles.adviceSection}>
+            <View className={styles.adviceItem}>
+              <Text className={styles.adviceIcon}>⏱️</Text>
+              <View className={styles.adviceContent}>
+                <Text className={styles.adviceLabel}>断电时长</Text>
+                <Text className={styles.adviceText}>累计 {formatDuration(order.riskAdvice.powerOffDuration)}</Text>
+              </View>
+            </View>
+            <View className={styles.adviceItem}>
+              <Text className={styles.adviceIcon}>👤</Text>
+              <View className={styles.adviceContent}>
+                <Text className={styles.adviceLabel}>承运方处置</Text>
+                <Text className={styles.adviceText}>{order.riskAdvice.carrierAction}</Text>
+              </View>
+            </View>
+            <View className={styles.adviceItem}>
+              <Text className={styles.adviceIcon}>⏰</Text>
+              <View className={styles.adviceContent}>
+                <Text className={styles.adviceLabel}>预计恢复</Text>
+                <Text className={styles.adviceText}>{order.riskAdvice.estimatedRecoveryTime}</Text>
+              </View>
+            </View>
+            <View className={styles.adviceItem}>
+              <Text className={styles.adviceIcon}>{getBackupPlanIcon()}</Text>
+              <View className={styles.adviceContent}>
+                <Text className={styles.adviceLabel}>收货建议</Text>
+                <Text className={styles.adviceText}>{order.riskAdvice.backupPlanText}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {order.powerOffDuration > 0 && order.handlingDescription && !order.riskAdvice && (
+        <View className={styles.statusSection}>
+          <Text className={styles.sectionTitle}>处置说明</Text>
+          <Text style={{ fontSize: 28, color: '#4e5969', lineHeight: 1.6 }}>
+            {order.handlingDescription}
+          </Text>
+        </View>
+      )}
+
       <View className={styles.eventsSection}>
         <Text className={styles.sectionTitle}>事件记录</Text>
         {order.events.length > 0 ? (
@@ -188,12 +254,23 @@ const OrderDetailPage: React.FC = () => {
         )}
       </View>
 
-      {order.powerOffDuration > 0 && order.handlingDescription && (
+      {effectiveConfirmResult && (
         <View className={styles.statusSection}>
-          <Text className={styles.sectionTitle}>处置说明</Text>
-          <Text style={{ fontSize: 28, color: '#4e5969', lineHeight: 1.6 }}>
-            {order.handlingDescription}
-          </Text>
+          <Text className={styles.sectionTitle}>收货确认</Text>
+          <View className={styles.confirmResult}>
+            <View className={`${styles.confirmResultBadge} ${styles[effectiveConfirmResult]}`}>
+              <Text>{formatConfirmResult(effectiveConfirmResult)}</Text>
+            </View>
+            {effectiveConfirmTime && (
+              <Text className={styles.confirmTime}>确认时间：{effectiveConfirmTime}</Text>
+            )}
+            {effectiveConfirmRemark && (
+              <View className={styles.confirmRemark}>
+                <Text className={styles.confirmRemarkLabel}>备注：</Text>
+                <Text className={styles.confirmRemarkText}>{effectiveConfirmRemark}</Text>
+              </View>
+            )}
+          </View>
         </View>
       )}
 
@@ -201,14 +278,14 @@ const OrderDetailPage: React.FC = () => {
         <View className={styles.btnSecondary} onClick={handleCallDriver}>
           <Text className={styles.btnText}>联系司机</Text>
         </View>
-        {order.orderStatus === 'arrived' ? (
+        {(effectiveOrderStatus || order.orderStatus) === 'arrived' && !effectiveConfirmResult ? (
           <View className={styles.btnPrimary} onClick={handleConfirm}>
             <Text className={styles.btnText}>到货确认</Text>
           </View>
-        ) : order.orderStatus === 'confirmed' ? (
+        ) : effectiveConfirmResult ? (
           <View className={styles.btnPrimary} style={{ background: '#f2f3f5' }}>
             <Text className={styles.btnText} style={{ color: '#86909c' }}>
-              已{formatConfirmResult(order.confirmResult)}
+              已{formatConfirmResult(effectiveConfirmResult)}
             </Text>
           </View>
         ) : (
